@@ -18,7 +18,6 @@ public class VehicleListServlet extends HttpServlet {
             throws ServletException, IOException {
         VehicleService vehicleService = VehicleService.getInstance();
         try {
-            System.out.println(vehicleService.findAll());
             request.setAttribute("vehicles", vehicleService.findAll());
         } catch (ServiceException e) {
             throw new ServletException();
