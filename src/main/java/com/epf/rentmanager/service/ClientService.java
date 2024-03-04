@@ -12,27 +12,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ClientService {
-
 	private ClientDao clientDao;
-	public static ClientService instance;
 
 	@Autowired
 	private ClientService(ClientDao clientDao){
 		this.clientDao = clientDao;
 	}
-
-	private ClientService() {
-		this.clientDao = ClientDao.getInstance();
-	}
-	
-	public static ClientService getInstance() {
-		if (instance == null) {
-			instance = new ClientService();
-		}
-		
-		return instance;
-	}
-	
 	
 	public long create(Client client) throws ServiceException {
 		if (client.nom().isEmpty() || client.prenom().isEmpty())

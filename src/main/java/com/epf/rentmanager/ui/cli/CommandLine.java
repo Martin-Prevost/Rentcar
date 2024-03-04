@@ -1,21 +1,54 @@
 package com.epf.rentmanager.ui.cli;
 
+import com.epf.rentmanager.configuration.AppConfiguration;
 import com.epf.rentmanager.exception.ServiceException;
 import com.epf.rentmanager.model.Client;
 import com.epf.rentmanager.model.Vehicle;
 import com.epf.rentmanager.service.ClientService;
 import com.epf.rentmanager.service.VehicleService;
 import com.epf.rentmanager.utils.IOUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.time.LocalDate;
 
-public class Cli {
+public class CommandLine {
     private ClientService clientService;
     private VehicleService vehicleService;
 
-    public Cli() {
-        this.clientService = ClientService.getInstance();
-        this.vehicleService = VehicleService.getInstance();
+    private CommandLine() {
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfiguration.class);
+        this.clientService = context.getBean(ClientService.class);
+        this.vehicleService = context.getBean(VehicleService.class);
+    }
+
+    public static void main(String[] args) {
+        IOUtils.print("Bienvenue dans RentManager !");
+        CommandLine cli = new CommandLine();
+        int choice;
+        do {
+            choice = IOUtils.readInt(
+                    """
+                    Que voulais vous faire ?
+                    1. Créer un client
+                    2. Lister les clients
+                    3. Créer un véhicule
+                    4. Lister les véhicules
+                    5. Supprimer un client
+                    6. Supprimer un véhicule
+                    7. Quitter
+                    """);
+            switch (choice) {
+                case 1 -> cli.createClient();
+                case 2 -> cli.listClient();
+                case 3 -> cli.createVehicle();
+                case 4 -> cli.listVehicle();
+                case 5 -> cli.deleteClient();
+                case 6 -> cli.deleteVehicle();
+                case 7 -> IOUtils.print("Arrêt de RentManager");
+                default -> IOUtils.print("Choix invalide");
+            }
+        } while (choice != 7);
     }
 
     public void createClient() {
