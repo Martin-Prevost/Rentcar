@@ -22,7 +22,7 @@ public class ClientService {
 	public long create(Client client) throws ServiceException {
 		if (client.nom().isEmpty() || client.prenom().isEmpty())
 			throw new ServiceException("Nom ou prénom ne doit pas être vide");
-		if (client.naissance() == null)
+		if (client.naissance() == null || client.naissance().isAfter(java.time.LocalDate.now().minusYears(18)))
 			throw new ServiceException("Date de naissance invalide");
 		String regex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 		if (!client.email().matches(regex))
