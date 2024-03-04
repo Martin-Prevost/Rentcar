@@ -5,6 +5,7 @@ import com.epf.rentmanager.exception.ServiceException;
 import com.epf.rentmanager.model.Client;
 import com.epf.rentmanager.model.Vehicle;
 import com.epf.rentmanager.service.ClientService;
+import com.epf.rentmanager.service.ReservationService;
 import com.epf.rentmanager.service.VehicleService;
 import com.epf.rentmanager.utils.IOUtils;
 import org.springframework.context.ApplicationContext;
@@ -15,11 +16,13 @@ import java.time.LocalDate;
 public class CommandLine {
     private ClientService clientService;
     private VehicleService vehicleService;
+    private ReservationService reservationService;
 
     private CommandLine() {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfiguration.class);
         this.clientService = context.getBean(ClientService.class);
         this.vehicleService = context.getBean(VehicleService.class);
+        this.reservationService = context.getBean(ReservationService.class);
     }
 
     public static void main(String[] args) {
@@ -36,7 +39,8 @@ public class CommandLine {
                     4. Lister les véhicules
                     5. Supprimer un client
                     6. Supprimer un véhicule
-                    7. Quitter
+                    7. Reservations d'un client
+                    8. Quitter
                     """);
             switch (choice) {
                 case 1 -> cli.createClient();
@@ -45,7 +49,8 @@ public class CommandLine {
                 case 4 -> cli.listVehicle();
                 case 5 -> cli.deleteClient();
                 case 6 -> cli.deleteVehicle();
-                case 7 -> IOUtils.print("Arrêt de RentManager");
+                case 7 -> cli.listReservationsByClient();
+                case 8 -> IOUtils.print("Arrêt de RentManager");
                 default -> IOUtils.print("Choix invalide");
             }
         } while (choice != 7);
@@ -115,6 +120,16 @@ public class CommandLine {
             IOUtils.print("Véhicule supprimé");
         } catch (ServiceException e) {
             IOUtils.print("Erreur lors de la suppression du véhicule");
+        }
+    }
+
+    public void listReservationsByClient() {
+        IOUtils.print("Liste des réservations d'un client");
+        long id = IOUtils.readInt("Id du client : ");
+        try {
+            reservationService.findResaByClientId(id).forEach(reservation -> IOUtils.print(reservation.toString()));
+        } catch (ServiceException e) {
+            IOUtils.print("Erreur lors de la récupération des réservations");
         }
     }
 }

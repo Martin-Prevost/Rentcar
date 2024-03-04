@@ -9,8 +9,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.epf.rentmanager.dto.ReservationDto;
 import com.epf.rentmanager.exception.DaoException;
 import com.epf.rentmanager.model.Reservation;
+import com.epf.rentmanager.model.Vehicle;
 import com.epf.rentmanager.persistence.ConnectionManager;
 import org.springframework.stereotype.Repository;
 
@@ -24,8 +26,9 @@ public class ReservationDao {
 	private static final String DELETE_RESERVATION_QUERY = "DELETE FROM Reservation WHERE id=?;";
 	private static final String FIND_RESERVATIONS_BY_CLIENT_QUERY =
  		"""
- 		SELECT id, vehicle_id, debut, fin 
- 		FROM Reservation 
+ 		SELECT Reservation.id, Vehicle.id AS vehicle_id, Vehicle.constructeur, Vehicle.modele, Vehicle.nb_places, debut, fin 
+ 		FROM Reservation
+ 		INNER JOIN Vehicle ON Reservation.vehicle_id = Vehicle.id
  		WHERE client_id=?;
  		""";
 	private static final String FIND_RESERVATIONS_BY_VEHICLE_QUERY =
@@ -68,19 +71,24 @@ public class ReservationDao {
 	}
 
 	
-	public List<Reservation> findResaByClientId(long clientId) throws DaoException {
+	public List<ReservationDto> findResaByClientId(long clientId) throws DaoException {
 		try (Connection connection = ConnectionManager.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(FIND_RESERVATIONS_BY_CLIENT_QUERY)) {
 			ps.setLong(1, clientId);
 			ResultSet resultSet = ps.executeQuery();
-			List<Reservation> reservations = new ArrayList<>();
+			List<ReservationDto> reservations = new ArrayList<>();
 			while (resultSet.next()) {
-				reservations.add(new Reservation(
+				reservations.add(new ReservationDto(
 						resultSet.getLong("id"),
-						clientId,
-						resultSet.getLong("vehicle_id"),
+						new Vehicle(
+								resultSet.getLong("vehicle_id"),
+								resultSet.getString("constructeur"),
+								resultSet.getString("modele"),
+								resultSet.getInt("nb_places")
+						),
 						resultSet.getDate("debut").toLocalDate(),
-						resultSet.getDate("fin").toLocalDate()));
+						resultSet.getDate("fin").toLocalDate())
+				);
 			}
 			return reservations;
 		} catch (SQLException e) {
@@ -98,9 +106,10 @@ public class ReservationDao {
 				reservations.add(new Reservation(
 						resultSet.getLong("id"),
 						resultSet.getLong("client_id"),
-						vehicleId,
+						resultSet.getLong("vehicle_id"),
 						resultSet.getDate("debut").toLocalDate(),
-						resultSet.getDate("fin").toLocalDate()));
+						resultSet.getDate("fin").toLocalDate())
+				);
 			}
 			return reservations;
 		} catch (SQLException e) {
