@@ -1,6 +1,7 @@
 package com.epf.rentmanager.servlet;
 
 
+import com.epf.rentmanager.dto.ReservationDto;
 import com.epf.rentmanager.exception.ServiceException;
 import com.epf.rentmanager.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/users/details")
 public class ClientDetailsServlet extends HttpServlet {
@@ -29,8 +31,10 @@ public class ClientDetailsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            request.setAttribute("reservations",
-                    reservationService.findResaByClientId(Long.parseLong(request.getParameter("id"))));
+            final long clientId = Long.parseLong(request.getParameter("id"));
+            request.setAttribute("reservations", reservationService.findResaByClientId(clientId));
+            request.setAttribute("nbReservations", reservationService.countByClientId(clientId));
+            request.setAttribute("nbVehicles", reservationService.countVehiclesByClientId(clientId));
         } catch (ServiceException e) {
             throw new ServletException();
         }

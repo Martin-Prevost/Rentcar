@@ -68,4 +68,20 @@ public class ReservationService {
             throw new ServiceException();
         }
     }
+
+    public int countByClientId(long clientId) throws ServiceException {
+        try {
+            return reservationDao.countByClientId(clientId);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
+
+    public int countVehiclesByClientId(long clientId) throws ServiceException {
+        try {
+            return reservationDao.countVehiclesByClientId(clientId);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
 }
