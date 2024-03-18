@@ -3,6 +3,7 @@ package com.epf.rentmanager.ui.cli;
 import com.epf.rentmanager.configuration.AppConfiguration;
 import com.epf.rentmanager.exception.ServiceException;
 import com.epf.rentmanager.model.Client;
+import com.epf.rentmanager.model.Reservation;
 import com.epf.rentmanager.model.Vehicle;
 import com.epf.rentmanager.service.ClientService;
 import com.epf.rentmanager.service.ReservationService;
@@ -40,7 +41,9 @@ public class CommandLine {
                     5. Supprimer un client
                     6. Supprimer un véhicule
                     7. Reservations d'un client
-                    8. Quitter
+                    8. Liste des réservations
+                    9. Créer une réservation
+                    10. Quitter
                     """);
             switch (choice) {
                 case 1 -> cli.createClient();
@@ -50,10 +53,12 @@ public class CommandLine {
                 case 5 -> cli.deleteClient();
                 case 6 -> cli.deleteVehicle();
                 case 7 -> cli.listReservationsByClient();
-                case 8 -> IOUtils.print("Arrêt de RentManager");
+                case 8 -> cli.listReservations();
+                case 9 -> cli.createReservation();
+                case 10 -> IOUtils.print("Arrêt de RentManager");
                 default -> IOUtils.print("Choix invalide");
             }
-        } while (choice != 7);
+        } while (choice != 9);
     }
 
     public void createClient() {
@@ -130,6 +135,29 @@ public class CommandLine {
             reservationService.findResaByClientId(id).forEach(reservation -> IOUtils.print(reservation.toString()));
         } catch (ServiceException e) {
             IOUtils.print("Erreur lors de la récupération des réservations");
+        }
+    }
+
+    public void listReservations() {
+        IOUtils.print("Liste des réservations");
+        try {
+            reservationService.findAll().forEach(reservation -> IOUtils.print(reservation.toString()));
+        } catch (ServiceException e) {
+            IOUtils.print("Erreur lors de la récupération des réservations");
+        }
+    }
+
+    public void createReservation() {
+        IOUtils.print("Saisi d'une nouvelle réservation");
+        long idClient = IOUtils.readInt("Id du client : ");
+        long idVehicle = IOUtils.readInt("Id du véhicule : ");
+        LocalDate debut = IOUtils.readDate("Date de début (jj/mm/aaaa) : ", true);
+        LocalDate fin = IOUtils.readDate("Date de fin (jj/mm/aaaa) : ", true);
+        try {
+            long idReservation = reservationService.create(new Reservation(idClient, idVehicle, debut, fin));
+            IOUtils.print(String.format("Réservation créée avec l'id %d", idReservation));
+        } catch (ServiceException e) {
+            IOUtils.print("Erreur lors de la création de la réservation");
         }
     }
 }

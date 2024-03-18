@@ -2,6 +2,7 @@ package com.epf.rentmanager.service;
 
 import com.epf.rentmanager.dao.ClientDao;
 import com.epf.rentmanager.dao.ReservationDao;
+import com.epf.rentmanager.dto.ReservationClientDto;
 import com.epf.rentmanager.dto.ReservationDto;
 import com.epf.rentmanager.exception.DaoException;
 import com.epf.rentmanager.exception.ServiceException;
@@ -53,7 +54,7 @@ public class ReservationService {
         }
     }
 
-    public List<Reservation> findAll() throws ServiceException {
+    public List<ReservationClientDto> findAll() throws ServiceException {
         try {
             return reservationDao.findAll();
         } catch (DaoException e) {

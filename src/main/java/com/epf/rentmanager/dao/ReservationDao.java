@@ -9,8 +9,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.epf.rentmanager.dto.ReservationClientDto;
 import com.epf.rentmanager.dto.ReservationDto;
 import com.epf.rentmanager.exception.DaoException;
+import com.epf.rentmanager.model.Client;
 import com.epf.rentmanager.model.Reservation;
 import com.epf.rentmanager.model.Vehicle;
 import com.epf.rentmanager.persistence.ConnectionManager;
@@ -37,7 +39,13 @@ public class ReservationDao {
 		FROM Reservation 
 		WHERE vehicle_id=?;
 		""";
-	private static final String FIND_RESERVATIONS_QUERY = "SELECT id, client_id, vehicle_id, debut, fin FROM Reservation;";
+	private static final String FIND_RESERVATIONS_QUERY =
+  		"""
+		SELECT Reservation.id, Vehicle.id AS vehicle_id, Vehicle.constructeur, Vehicle.modele, Vehicle.nb_places, Client.id as client_id, Client.nom, Client.prenom, Client.email, Client.naissance, debut, fin
+		FROM Reservation
+		INNER JOIN Vehicle ON Reservation.vehicle_id = Vehicle.id
+		INNER JOIN Client ON Reservation.client_id = Client.id;
+		""";
 	private static final String COUNT_RESERVATIONS_QUERY = "SELECT COUNT(id) FROM Reservation;";
 	private static final String COUNT_RESERVATIONS_BY_CLIENT_QUERY = "SELECT COUNT(id) FROM Reservation WHERE client_id=?;";
 	private static final String COUNT_VEHICLES_BY_CLIENT_QUERY = "SELECT COUNT(DISTINCT(vehicle_id)) FROM Reservation WHERE client_id=?;";
@@ -120,16 +128,27 @@ public class ReservationDao {
 		}
 	}
 
-	public List<Reservation> findAll() throws DaoException {
+	public List<ReservationClientDto> findAll() throws DaoException {
 		try (Connection connection = ConnectionManager.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(FIND_RESERVATIONS_QUERY)) {
 			ResultSet resultSet = ps.executeQuery();
-			List<Reservation> reservations = new ArrayList<>();
+			List<ReservationClientDto> reservations = new ArrayList<>();
 			while (resultSet.next()) {
-				reservations.add(new Reservation(
+				reservations.add(new ReservationClientDto(
 						resultSet.getLong("id"),
-						resultSet.getLong("client_id"),
-						resultSet.getLong("vehicle_id"),
+						new Vehicle(
+								resultSet.getLong("vehicle_id"),
+								resultSet.getString("constructeur"),
+								resultSet.getString("modele"),
+								resultSet.getInt("nb_places")
+						),
+						new Client(
+								resultSet.getLong("client_id"),
+								resultSet.getString("nom"),
+								resultSet.getString("prenom"),
+								resultSet.getString("email"),
+								resultSet.getDate("naissance").toLocalDate()
+						),
 						resultSet.getDate("debut").toLocalDate(),
 						resultSet.getDate("fin").toLocalDate()));
 			}
