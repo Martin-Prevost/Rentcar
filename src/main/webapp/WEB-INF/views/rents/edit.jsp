@@ -14,7 +14,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Reservations
+                Modifier Reservation
             </h1>
         </section>
 
@@ -33,7 +33,7 @@
                                     <div class="col-sm-10">
                                         <select class="form-control" id="car" name="car">
                                             <c:forEach items="${vehicles}" var="vehicle">
-                                            <option value="${vehicle.id()}">${vehicle.constructeur()} ${vehicle.modele()}</option>
+                                                <option value="${vehicle.id()}" <c:if test="${reservation.vehicle().id() eq vehicle.id()}">selected</c:if>>${vehicle.constructeur()} ${vehicle.modele()}</option>
                                             </c:forEach>
                                         </select>
                                     </div>
@@ -44,7 +44,7 @@
                                     <div class="col-sm-10">
                                         <select class="form-control" id="client" name="client">
                                             <c:forEach items="${clients}" var="client">
-                                                <option value="${client.id()}">${client.nom()} ${client.prenom()}</option>
+                                                <option value="${client.id()}" <c:if test="${reservation.client().id() eq client.id()}">selected</c:if>>${client.nom()} ${client.prenom()}</option>
                                             </c:forEach>
                                         </select>
                                     </div>
@@ -53,20 +53,20 @@
                                     <label for="begin" class="col-sm-2 control-label">Date de debut</label>
 
                                     <div class="col-sm-10">
-                                        <input type="date" class="form-control" id="begin" name="begin" placeholder="Date de début">
+                                        <input type="date" class="form-control" id="begin" name="begin" placeholder="Date de début" value="${reservation.debut()}">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="end" class="col-sm-2 control-label">Date de fin</label>
 
                                     <div class="col-sm-10">
-                                        <input type="date" class="form-control" id="end" name="end" placeholder="Date de fin">
+                                        <input type="date" class="form-control" id="end" name="end" placeholder="Date de fin" value="${reservation.fin()}">
                                     </div>
                                 </div>
                             </div>
                             <!-- /.box-body -->
                             <div class="box-footer">
-                                <button type="submit" class="btn btn-info pull-right">Ajouter</button>
+                                <button type="submit" class="btn btn-info pull-right">Modifier</button>
                             </div>
                             <!-- /.box-footer -->
                         </form>

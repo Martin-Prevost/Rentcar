@@ -2,6 +2,7 @@ package com.epf.rentmanager.service;
 
 import com.epf.rentmanager.dao.ClientDao;
 import com.epf.rentmanager.dao.ReservationDao;
+import com.epf.rentmanager.dto.ReservationClientDto;
 import com.epf.rentmanager.dto.ReservationDto;
 import com.epf.rentmanager.exception.DaoException;
 import com.epf.rentmanager.exception.ServiceException;
@@ -53,7 +54,7 @@ public class ReservationService {
         }
     }
 
-    public List<Reservation> findAll() throws ServiceException {
+    public List<ReservationClientDto> findAll() throws ServiceException {
         try {
             return reservationDao.findAll();
         } catch (DaoException e) {
@@ -80,6 +81,22 @@ public class ReservationService {
     public int countVehiclesByClientId(long clientId) throws ServiceException {
         try {
             return reservationDao.countVehiclesByClientId(clientId);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
+
+    public ReservationClientDto findById(long id) throws ServiceException {
+        try {
+            return reservationDao.findById(id);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
+
+    public void update(Reservation reservation) throws ServiceException {
+        try {
+            reservationDao.update(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
         }
