@@ -1,7 +1,6 @@
 package com.epf.rentmanager.servlet.users;
 
 
-import com.epf.rentmanager.dto.ReservationDto;
 import com.epf.rentmanager.exception.ServiceException;
 import com.epf.rentmanager.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/users/details")
-public class ClientDetailsServlet extends HttpServlet {
+public class ClientEditServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Autowired
