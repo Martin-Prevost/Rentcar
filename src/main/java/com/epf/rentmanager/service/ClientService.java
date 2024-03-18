@@ -18,8 +18,8 @@ public class ClientService {
 	private ClientService(ClientDao clientDao){
 		this.clientDao = clientDao;
 	}
-	
-	public long create(Client client) throws ServiceException {
+
+	private Client verifClient(Client client) throws ServiceException {
 		if (client.nom().isEmpty() || client.prenom().isEmpty())
 			throw new ServiceException("Nom ou prénom ne doit pas être vide");
 		if (client.naissance() == null || client.naissance().isAfter(java.time.LocalDate.now().minusYears(18)))
@@ -28,13 +28,18 @@ public class ClientService {
 		if (!client.email().matches(regex))
 			throw new ServiceException("Email invalide");
 
-		client = new Client(
+		return new Client(
 				client.id(),
 				client.nom().toUpperCase(),
 				client.prenom(),
 				client.email(),
 				client.naissance()
 		);
+	}
+
+	public long create(Client client) throws ServiceException {
+		client = verifClient(client);
+
 		try {
 			return clientDao.create(client);
 		} catch (DaoException e) {
@@ -75,6 +80,16 @@ public class ClientService {
 	public int count() throws ServiceException {
 		try {
 			return clientDao.count();
+		} catch (DaoException e) {
+			throw new ServiceException();
+		}
+	}
+
+	public void update(Client client) throws ServiceException {
+		client = verifClient(client);
+
+		try {
+			clientDao.update(client);
 		} catch (DaoException e) {
 			throw new ServiceException();
 		}
