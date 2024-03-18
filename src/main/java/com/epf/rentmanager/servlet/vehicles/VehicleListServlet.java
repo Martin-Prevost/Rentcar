@@ -2,6 +2,7 @@ package com.epf.rentmanager.servlet.vehicles;
 
 import com.epf.rentmanager.configuration.AppConfiguration;
 import com.epf.rentmanager.exception.ServiceException;
+import com.epf.rentmanager.model.Vehicle;
 import com.epf.rentmanager.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 
 @WebServlet("/cars")
 public class VehicleListServlet extends HttpServlet {
@@ -30,7 +32,14 @@ public class VehicleListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            request.setAttribute("vehicles", vehicleService.findAll());
+            if (request.getParameter("id") != null) {
+                long id = Long.parseLong(request.getParameter("id"));
+                request.setAttribute("vehicles", new ArrayList<Vehicle>() {{
+                    add(vehicleService.findById(id));
+                }});
+            } else {
+                request.setAttribute("vehicles", vehicleService.findAll());
+            }
         } catch (ServiceException e) {
             throw new ServletException();
         }

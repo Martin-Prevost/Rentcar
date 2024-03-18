@@ -32,12 +32,12 @@ public class ClientDetailsServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             final long clientId = Long.parseLong(request.getParameter("id"));
-            request.setAttribute("reservations", reservationService.findResaByClientId(clientId));
+            request.setAttribute("reservation", reservationService.findResaByClientId(clientId));
             request.setAttribute("nbReservations", reservationService.countByClientId(clientId));
             request.setAttribute("nbVehicles", reservationService.countVehiclesByClientId(clientId));
         } catch (ServiceException e) {
             throw new ServletException();
         }
-        this.getServletContext().getRequestDispatcher("/WEB-INF/views/users/details.jsp").forward(request, response);
+        this.getServletContext().getRequestDispatcher("/WEB-INF/views/users/edit.jsp").forward(request, response);
     }
 }

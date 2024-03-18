@@ -13,13 +13,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/rents")
-public class ReservationListServlet extends HttpServlet {
+@WebServlet("/rents/delete")
+public class ReservationDeleteServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     @Autowired
     private ReservationService reservationService;
 
-    @Override
     public void init() throws ServletException {
         super.init();
         SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
@@ -28,10 +27,10 @@ public class ReservationListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            request.setAttribute("reservations", reservationService.findAll());
+            reservationService.delete(new Reservation(Long.parseLong(request.getParameter("id"))));
         } catch (ServiceException e) {
             throw new ServletException();
         }
-        this.getServletContext().getRequestDispatcher("/WEB-INF/views/rents/list.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/rents");
     }
 }

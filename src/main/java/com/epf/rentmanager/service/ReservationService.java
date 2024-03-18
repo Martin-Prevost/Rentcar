@@ -85,4 +85,20 @@ public class ReservationService {
             throw new ServiceException();
         }
     }
+
+    public ReservationClientDto findById(long id) throws ServiceException {
+        try {
+            return reservationDao.findById(id);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
+
+    public void update(Reservation reservation) throws ServiceException {
+        try {
+            reservationDao.update(reservation);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
 }
