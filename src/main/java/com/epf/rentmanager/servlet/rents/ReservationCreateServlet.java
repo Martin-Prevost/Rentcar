@@ -1,4 +1,4 @@
-package com.epf.rentmanager.servlet;
+package com.epf.rentmanager.servlet.rents;
 
 import com.epf.rentmanager.model.Reservation;
 import com.epf.rentmanager.service.ClientService;

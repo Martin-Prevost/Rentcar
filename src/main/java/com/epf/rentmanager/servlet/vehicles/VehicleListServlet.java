@@ -1,7 +1,8 @@
-package com.epf.rentmanager.servlet;
+package com.epf.rentmanager.servlet.vehicles;
 
 import com.epf.rentmanager.configuration.AppConfiguration;
-import com.epf.rentmanager.service.ClientService;
+import com.epf.rentmanager.exception.ServiceException;
+import com.epf.rentmanager.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -14,11 +15,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/users")
-public class ClientListServlet extends HttpServlet {
+@WebServlet("/cars")
+public class VehicleListServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     @Autowired
-    private ClientService clientService;
+    private VehicleService vehicleService;
 
     @Override
     public void init() throws ServletException {
@@ -29,10 +30,10 @@ public class ClientListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            request.setAttribute("clients", clientService.findAll());
-        } catch (Exception e) {
+            request.setAttribute("vehicles", vehicleService.findAll());
+        } catch (ServiceException e) {
             throw new ServletException();
         }
-        this.getServletContext().getRequestDispatcher("/WEB-INF/views/users/list.jsp").forward(request, response);
+        this.getServletContext().getRequestDispatcher("/WEB-INF/views/vehicles/list.jsp").forward(request, response);
     }
 }
