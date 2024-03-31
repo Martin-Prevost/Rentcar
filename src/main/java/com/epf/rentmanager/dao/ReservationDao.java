@@ -41,6 +41,12 @@ public class ReservationDao {
 		INNER JOIN Client ON Reservation.client_id = Client.id
 		WHERE vehicle_id=?;
 		""";
+	private static final String FIND_RESERVATIONS_BY_VEHICLE_RESERVATION_QUERY =
+		"""
+		SELECT id, vehicle_id, client_id, debut, fin
+		FROM Reservation 
+		WHERE vehicle_id=?;
+		""";
 	private static final String FIND_RESERVATIONS_QUERY =
   		"""
 		SELECT Reservation.id, Vehicle.id AS vehicle_id, Vehicle.constructeur, Vehicle.modele, Vehicle.nb_places, Client.id as client_id, Client.nom, Client.prenom, Client.email, Client.naissance, debut, fin
@@ -142,6 +148,27 @@ public class ReservationDao {
 							resultSet.getDate("debut").toLocalDate(),
 							resultSet.getDate("fin").toLocalDate()
 						)
+				);
+			}
+			return reservations;
+		} catch (SQLException e) {
+			throw new DaoException();
+		}
+	}
+
+	public List<Reservation> findResaByVehicleIdReservation(long vehicleId) throws DaoException {
+		try (Connection connection = ConnectionManager.getConnection();
+			 PreparedStatement ps = connection.prepareStatement(FIND_RESERVATIONS_BY_VEHICLE_RESERVATION_QUERY)) {
+			ps.setLong(1, vehicleId);
+			ResultSet resultSet = ps.executeQuery();
+			List<Reservation> reservations = new ArrayList<>();
+			while (resultSet.next()) {
+				reservations.add(new Reservation(
+						resultSet.getLong("id"),
+						resultSet.getLong("client_id"),
+						resultSet.getLong("vehicle_id"),
+						resultSet.getDate("debut").toLocalDate(),
+						resultSet.getDate("fin").toLocalDate())
 				);
 			}
 			return reservations;

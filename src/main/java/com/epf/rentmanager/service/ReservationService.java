@@ -10,6 +10,8 @@ import com.epf.rentmanager.model.Reservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -40,8 +42,25 @@ public class ReservationService {
         if (reservation.fin().minusDays(7).isAfter(reservation.debut())) {
             throw new ServiceException("The maximum booking duration is 7 days.");
         }
-        if (reservation.fin().minusDays(30).isAfter(reservation.debut())) {
-            throw new ServiceException("A vehicle cannot be booked for 30 consecutive days without a break.");
+    }
+
+    private void check30Days(Reservation reservation) throws ServiceException, DaoException {
+        List<Reservation> reservations = reservationDao.findResaByVehicleIdReservation(reservation.vehicleId());
+        reservations.add(reservation);
+        reservations.sort(Comparator.comparing(Reservation::debut));
+
+        int nbDays = 0;
+        for (int i = 0; i < reservations.size() - 1; i++) {
+            Reservation current = reservations.get(i);
+            Reservation next = reservations.get(i + 1);
+            if (current.fin().plusDays(1).isEqual(next.fin())) {
+                nbDays += current.debut().until(next.fin()).getDays();
+                if (nbDays >= 30) {
+                    throw new ServiceException("A vehicle cannot be booked for 30 consecutive days without a break.");
+                }
+            } else {
+                nbDays = 0;
+            }
         }
     }
 
@@ -49,6 +68,8 @@ public class ReservationService {
     public long create(Reservation reservation) throws ServiceException {
         try {
             checkDoubleBooking(reservation);
+            checkMaxBooking(reservation);
+            check30Days(reservation);
             return reservationDao.create(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
@@ -74,6 +95,14 @@ public class ReservationService {
     public List<ReservationClientDto> findResaByVehicleId(long vehicleId) throws ServiceException {
         try {
             return reservationDao.findResaByVehicleId(vehicleId);
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
+
+    public List<Reservation> findResaByVehicleIdReservation(long vehicleId) throws ServiceException {
+        try {
+            return reservationDao.findResaByVehicleIdReservation(vehicleId);
         } catch (DaoException e) {
             throw new ServiceException();
         }
@@ -122,6 +151,8 @@ public class ReservationService {
     public void update(Reservation reservation) throws ServiceException {
         try {
             checkDoubleBooking(reservation);
+            checkMaxBooking(reservation);
+            check30Days(reservation);
             reservationDao.update(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
