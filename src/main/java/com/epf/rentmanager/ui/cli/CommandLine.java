@@ -1,8 +1,7 @@
 package com.epf.rentmanager.ui.cli;
 
 import com.epf.rentmanager.configuration.AppConfiguration;
-import com.epf.rentmanager.dto.ReservationClientDto;
-import com.epf.rentmanager.dto.ReservationDto;
+import com.epf.rentmanager.dto.ReservationClientVehicleDto;
 import com.epf.rentmanager.exception.ServiceException;
 import com.epf.rentmanager.model.Client;
 import com.epf.rentmanager.model.Reservation;
@@ -46,7 +45,8 @@ public class CommandLine {
                     8. Liste des réservations
                     9. Créer une réservation
                     10. Rechercher une réservation
-                    11. Quitter
+                    11. Rerservations d'un véhicule
+                    12. Quitter
                     """);
             switch (choice) {
                 case 1 -> cli.createClient();
@@ -59,10 +59,11 @@ public class CommandLine {
                 case 8 -> cli.listReservations();
                 case 9 -> cli.createReservation();
                 case 10 -> cli.findByIdReservation();
-                case 11 -> IOUtils.print("Arrêt de RentManager");
+                case 11 -> cli.listReservationsByVehicle();
+                case 12 -> IOUtils.print("Arrêt de RentManager");
                 default -> IOUtils.print("Choix invalide");
             }
-        } while (choice != 11);
+        } while (choice != 12);
     }
 
     public void createClient() {
@@ -169,10 +170,20 @@ public class CommandLine {
         IOUtils.print("Recherche d'une réservation");
         long id = IOUtils.readInt("Id de la réservation : ");
         try {
-            ReservationClientDto reservation = reservationService.findById(id);
+            ReservationClientVehicleDto reservation = reservationService.findById(id);
             IOUtils.print(reservation.toString());
         } catch (ServiceException e) {
             IOUtils.print("Erreur lors de la récupération de la réservation");
+        }
+    }
+
+    public void listReservationsByVehicle() {
+        IOUtils.print("Liste des réservations d'un véhicule");
+        long id = IOUtils.readInt("Id du véhicule : ");
+        try {
+            reservationService.findResaByVehicleId(id).forEach(reservation -> IOUtils.print(reservation.toString()));
+        } catch (ServiceException e) {
+            IOUtils.print("Erreur lors de la récupération des réservations");
         }
     }
 }

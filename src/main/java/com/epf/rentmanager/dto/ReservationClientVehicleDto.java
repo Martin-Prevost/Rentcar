@@ -5,5 +5,5 @@ import com.epf.rentmanager.model.Vehicle;
 
 import java.time.LocalDate;
 
-public record ReservationClientDto(long id, Client client, LocalDate debut, LocalDate fin) {}
+public record ReservationClientVehicleDto(long id, Vehicle vehicle, Client client, LocalDate debut, LocalDate fin) {}
 

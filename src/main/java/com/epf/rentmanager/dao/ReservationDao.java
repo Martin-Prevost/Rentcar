@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.epf.rentmanager.dto.ReservationClientDto;
-import com.epf.rentmanager.dto.ReservationDto;
+import com.epf.rentmanager.dto.ReservationClientVehicleDto;
+import com.epf.rentmanager.dto.ReservationVehicleDto;
 import com.epf.rentmanager.exception.DaoException;
 import com.epf.rentmanager.model.Client;
 import com.epf.rentmanager.model.Reservation;
@@ -35,8 +36,9 @@ public class ReservationDao {
  		""";
 	private static final String FIND_RESERVATIONS_BY_VEHICLE_QUERY =
   		"""
-		SELECT id, client_id, debut, fin 
+		SELECT Reservation.id, Client.id as client_id, Client.nom, Client.prenom, Client.email, Client.naissance, debut, fin
 		FROM Reservation 
+		INNER JOIN Client ON Reservation.client_id = Client.id
 		WHERE vehicle_id=?;
 		""";
 	private static final String FIND_RESERVATIONS_QUERY =
@@ -96,14 +98,14 @@ public class ReservationDao {
 	}
 
 	
-	public List<ReservationDto> findResaByClientId(long clientId) throws DaoException {
+	public List<ReservationVehicleDto> findResaByClientId(long clientId) throws DaoException {
 		try (Connection connection = ConnectionManager.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(FIND_RESERVATIONS_BY_CLIENT_QUERY)) {
 			ps.setLong(1, clientId);
 			ResultSet resultSet = ps.executeQuery();
-			List<ReservationDto> reservations = new ArrayList<>();
+			List<ReservationVehicleDto> reservations = new ArrayList<>();
 			while (resultSet.next()) {
-				reservations.add(new ReservationDto(
+				reservations.add(new ReservationVehicleDto(
 						resultSet.getLong("id"),
 						new Vehicle(
 								resultSet.getLong("vehicle_id"),
@@ -121,19 +123,25 @@ public class ReservationDao {
 		}
 	}
 	
-	public List<Reservation> findResaByVehicleId(long vehicleId) throws DaoException {
+	public List<ReservationClientDto> findResaByVehicleId(long vehicleId) throws DaoException {
 		try (Connection connection = ConnectionManager.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(FIND_RESERVATIONS_BY_VEHICLE_QUERY)) {
 			ps.setLong(1, vehicleId);
 			ResultSet resultSet = ps.executeQuery();
-			List<Reservation> reservations = new ArrayList<>();
+			List<ReservationClientDto> reservations = new ArrayList<>();
 			while (resultSet.next()) {
-				reservations.add(new Reservation(
-						resultSet.getLong("id"),
-						resultSet.getLong("client_id"),
-						resultSet.getLong("vehicle_id"),
-						resultSet.getDate("debut").toLocalDate(),
-						resultSet.getDate("fin").toLocalDate())
+				reservations.add(new ReservationClientDto(
+							resultSet.getLong("id"),
+							new Client(
+									resultSet.getLong("client_id"),
+									resultSet.getString("nom"),
+									resultSet.getString("prenom"),
+									resultSet.getString("email"),
+									resultSet.getDate("naissance").toLocalDate()
+							),
+							resultSet.getDate("debut").toLocalDate(),
+							resultSet.getDate("fin").toLocalDate()
+						)
 				);
 			}
 			return reservations;
@@ -142,13 +150,13 @@ public class ReservationDao {
 		}
 	}
 
-	public List<ReservationClientDto> findAll() throws DaoException {
+	public List<ReservationClientVehicleDto> findAll() throws DaoException {
 		try (Connection connection = ConnectionManager.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(FIND_RESERVATIONS_QUERY)) {
 			ResultSet resultSet = ps.executeQuery();
-			List<ReservationClientDto> reservations = new ArrayList<>();
+			List<ReservationClientVehicleDto> reservations = new ArrayList<>();
 			while (resultSet.next()) {
-				reservations.add(new ReservationClientDto(
+				reservations.add(new ReservationClientVehicleDto(
 						resultSet.getLong("id"),
 						new Vehicle(
 								resultSet.getLong("vehicle_id"),
@@ -216,13 +224,13 @@ public class ReservationDao {
 		}
 	}
 
-	public ReservationClientDto findById(long id) throws DaoException {
+	public ReservationClientVehicleDto findById(long id) throws DaoException {
 		try (Connection connection = ConnectionManager.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(FIND_BY_RESERVATION_ID_QUERY)) {
 			ps.setLong(1, id);
 			ResultSet resultSet = ps.executeQuery();
 			if (resultSet.next()) {
-				return new ReservationClientDto(
+				return new ReservationClientVehicleDto(
 						resultSet.getLong("id"),
 						new Vehicle(
 								resultSet.getLong("vehicle_id"),
