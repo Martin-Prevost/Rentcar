@@ -1,12 +1,9 @@
-package com.epf.rentmanager.servlet.vehicles;
+package com.epf.rentmanager.servlet.rents;
 
-import com.epf.rentmanager.configuration.AppConfiguration;
+import com.epf.rentmanager.dto.ReservationClientVehicleDto;
 import com.epf.rentmanager.exception.ServiceException;
-import com.epf.rentmanager.model.Vehicle;
-import com.epf.rentmanager.service.VehicleService;
+import com.epf.rentmanager.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.servlet.ServletException;
@@ -15,13 +12,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 
-@WebServlet("/cars")
-public class VehicleListServlet extends HttpServlet {
+@WebServlet("/rents/details")
+public class ReservationDetailsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
     @Autowired
-    private VehicleService vehicleService;
+    private ReservationService reservationService;
 
     @Override
     public void init() throws ServletException {
@@ -32,10 +29,11 @@ public class VehicleListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            request.setAttribute("vehicles", vehicleService.findAll());
+            long id = Long.parseLong(request.getParameter("id"));
+            request.setAttribute("reservation", reservationService.findById(id));
         } catch (ServiceException e) {
             throw new ServletException();
         }
-        this.getServletContext().getRequestDispatcher("/WEB-INF/views/vehicles/list.jsp").forward(request, response);
+        this.getServletContext().getRequestDispatcher("/WEB-INF/views/rents/details.jsp").forward(request, response);
     }
 }
