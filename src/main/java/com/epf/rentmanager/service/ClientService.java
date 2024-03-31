@@ -21,7 +21,9 @@ public class ClientService {
 
 	private Client verifClient(Client client) throws ServiceException {
 		if (client.nom().isEmpty() || client.prenom().isEmpty())
-			throw new ServiceException("Nom ou prénom ne doit pas être vide");
+			throw new ServiceException("Nom et prénom ne doivent pas être vide");
+		if (client.nom().length() < 3 || client.prenom().length() < 3)
+			throw new ServiceException("Nom et prénom doivent faire au moins 3 caractères");
 		if (client.naissance() == null || client.naissance().isAfter(java.time.LocalDate.now().minusYears(18)))
 			throw new ServiceException("Date de naissance invalide");
 		String regex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";

@@ -35,10 +35,18 @@ public class VehicleCreateServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            String manufacturer = request.getParameter("manufacturer");
+            String modele = request.getParameter("modele");
+            int seats = Integer.parseInt(request.getParameter("seats"));
+            if (manufacturer.isEmpty() || modele.isEmpty())
+                throw new ServletException("Le constructeur et le modèle ne doivent pas être vide");
+            if (seats < 2 || seats > 9)
+                throw new ServletException("Le nombre de places doit être compris entre 2 et 9");
+
             vehicleService.create(new Vehicle(
-                    request.getParameter("manufacturer"),
-                    request.getParameter("modele"),
-                    Integer.parseInt(request.getParameter("seats"))
+                    manufacturer,
+                    modele,
+                    seats
             ));
         } catch (ServiceException e) {
             throw new ServletException();

@@ -46,11 +46,20 @@ public class ReservationCreateServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            java.time.LocalDate begin = java.time.LocalDate.parse(request.getParameter("begin"));
+            java.time.LocalDate end = java.time.LocalDate.parse(request.getParameter("end"));
+            if (begin.isAfter(end)) {
+                throw new ServletException("The start date must be before the end date.");
+            }
+            if (end.minusDays(7).isAfter(begin)) {
+                throw new ServletException("The maximum booking duration is 7 days.");
+            }
+
             reservationService.create(new Reservation(
                     Long.parseLong(request.getParameter("client")),
                     Long.parseLong(request.getParameter("car")),
-                    java.time.LocalDate.parse(request.getParameter("begin")),
-                    java.time.LocalDate.parse(request.getParameter("end"))
+                    begin,
+                    end
             ));
         } catch (Exception e) {
             System.out.println(e.getMessage());

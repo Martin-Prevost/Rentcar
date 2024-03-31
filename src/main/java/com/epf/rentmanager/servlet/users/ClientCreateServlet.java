@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 
 @WebServlet("/users/create")
 public class ClientCreateServlet extends HttpServlet {
@@ -32,13 +33,23 @@ public class ClientCreateServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String prenom = request.getParameter("last_name");
+        String firstName = request.getParameter("first_name");
+        String email = request.getParameter("email");
+        LocalDate dateNassance = java.time.LocalDate.parse(request.getParameter("birth"));
+
+        if (prenom.isEmpty() || firstName.isEmpty())
+            throw new ServletException("Nom et prénom ne doivent pas être vide");
+        if (prenom.length() < 3 || firstName.length() < 3)
+            throw new ServletException("Nom et prénom doivent faire au moins 3 caractères");
+        if (dateNassance == null || dateNassance.isAfter(java.time.LocalDate.now().minusYears(18)))
+            throw new ServletException("Date de naissance invalide");
+        String regex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+        if (!email.matches(regex))
+            throw new ServletException("Email invalide");
+
         try {
-            clientService.create(new Client(
-                    request.getParameter("last_name"),
-                    request.getParameter("first_name"),
-                    request.getParameter("email"),
-                    java.time.LocalDate.parse(request.getParameter("birth"))
-            ));
+            clientService.create(new Client(prenom, firstName, email, dateNassance));
         } catch (ServiceException e) {
             throw new ServletException();
         }

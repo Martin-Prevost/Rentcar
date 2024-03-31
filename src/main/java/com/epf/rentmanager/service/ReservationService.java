@@ -21,8 +21,34 @@ public class ReservationService {
         this.reservationDao = reservationDao;
     }
 
+    private void checkDoubleBooking(Reservation reservation) throws ServiceException {
+        try {
+            List<ReservationClientDto> reservations = reservationDao.findResaByVehicleId(reservation.vehicleId());
+            for (ReservationClientDto existingReservation : reservations) {
+                if ((reservation.debut().isAfter(existingReservation.debut()) && reservation.debut().isBefore(existingReservation.fin()))
+                || (reservation.fin().isAfter(existingReservation.debut()) && reservation.fin().isBefore(existingReservation.fin()))
+                || (reservation.debut().isEqual(existingReservation.debut()) && reservation.fin().isEqual(existingReservation.fin()))) {
+                    throw new ServiceException("The vehicle is already reserved on this date.");
+                }
+            }
+        } catch (DaoException e) {
+            throw new ServiceException();
+        }
+    }
+
+    private void checkMaxBooking(Reservation reservation) throws ServiceException {
+        if (reservation.fin().minusDays(7).isAfter(reservation.debut())) {
+            throw new ServiceException("The maximum booking duration is 7 days.");
+        }
+        if (reservation.fin().minusDays(30).isAfter(reservation.debut())) {
+            throw new ServiceException("A vehicle cannot be booked for 30 consecutive days without a break.");
+        }
+    }
+
+
     public long create(Reservation reservation) throws ServiceException {
         try {
+            checkDoubleBooking(reservation);
             return reservationDao.create(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
@@ -95,6 +121,7 @@ public class ReservationService {
 
     public void update(Reservation reservation) throws ServiceException {
         try {
+            checkDoubleBooking(reservation);
             reservationDao.update(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
