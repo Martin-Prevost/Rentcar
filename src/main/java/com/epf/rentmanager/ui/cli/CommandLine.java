@@ -62,7 +62,7 @@ public class CommandLine {
                 case 11 -> IOUtils.print("Arrêt de RentManager");
                 default -> IOUtils.print("Choix invalide");
             }
-        } while (choice != 9);
+        } while (choice != 11);
     }
 
     public void createClient() {
