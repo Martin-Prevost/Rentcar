@@ -81,4 +81,36 @@ public class ClientServiceTest {
                 LocalDate.now().minusYears(19)));
         assertEquals(id, 1L);
     }
+
+    @Test
+    void delete_should_throw_ServiceException_when_dao_throws_DaoException() throws DaoException {
+        when(this.clientDao.delete(any(Client.class))).thenThrow(DaoException.class);
+
+        assertThrows(ServiceException.class, () -> {
+            clientService.delete(new Client(1));
+        });
+    }
+
+    @Test
+    void delete_should_return_id_when_client_is_deleted() throws ServiceException, DaoException {
+        when(this.clientDao.delete(any(Client.class))).thenReturn(1L);
+        long id = clientService.delete(new Client(1));
+        assertEquals(id, 1L);
+    }
+
+    @Test
+    void findById_should_throw_ServiceException_when_id_is_negative() {
+        assertThrows(ServiceException.class, () -> {
+            clientService.findById(-1);
+        });
+    }
+
+    @Test
+    void findById_should_throw_ServiceException_when_dao_throws_DaoException() throws DaoException {
+        when(this.clientDao.findById(any(Long.class))).thenThrow(DaoException.class);
+
+        assertThrows(ServiceException.class, () -> {
+            clientService.findById(1);
+        });
+    }
 }
