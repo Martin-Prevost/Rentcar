@@ -29,7 +29,8 @@ public class ReservationService {
             for (ReservationClientDto existingReservation : reservations) {
                 if ((reservation.debut().isAfter(existingReservation.debut()) && reservation.debut().isBefore(existingReservation.fin()))
                 || (reservation.fin().isAfter(existingReservation.debut()) && reservation.fin().isBefore(existingReservation.fin()))
-                || (reservation.debut().isEqual(existingReservation.debut()) && reservation.fin().isEqual(existingReservation.fin()))) {
+                || reservation.debut().isEqual(existingReservation.debut()) || reservation.debut().isEqual(existingReservation.fin())
+                || reservation.fin().isEqual(existingReservation.debut()) ||reservation.fin().isEqual(existingReservation.fin())) {
                     throw new ServiceException("The vehicle is already reserved on this date.");
                 }
             }
