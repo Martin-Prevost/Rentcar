@@ -23,9 +23,12 @@ public class ReservationService {
         this.reservationDao = reservationDao;
     }
 
-    private void checkDoubleBooking(Reservation reservation) throws ServiceException {
+    private void checkDoubleBooking(Reservation reservation, boolean isUpdate) throws ServiceException {
         try {
             List<ReservationClientDto> reservations = reservationDao.findResaByVehicleId(reservation.vehicleId());
+            if (isUpdate) {
+                reservations.removeIf(resa -> resa.id() == reservation.id());
+            }
             for (ReservationClientDto existingReservation : reservations) {
                 if ((reservation.debut().isAfter(existingReservation.debut()) && reservation.debut().isBefore(existingReservation.fin()))
                 || (reservation.fin().isAfter(existingReservation.debut()) && reservation.fin().isBefore(existingReservation.fin()))
@@ -45,18 +48,19 @@ public class ReservationService {
         }
     }
 
-    private void check30Days(Reservation reservation) throws ServiceException, DaoException {
+    private void check30Days(Reservation reservation, boolean isUpdate) throws ServiceException, DaoException {
         List<Reservation> reservations = reservationDao.findResaByVehicleIdReservation(reservation.vehicleId());
+        if (isUpdate) {
+            reservations.removeIf(resa -> resa.id() == reservation.id());
+        }
         reservations.add(reservation);
         reservations.sort(Comparator.comparing(Reservation::debut));
 
-        int nbDays = 0;
-        for (int i = 0; i < reservations.size() - 1; i++) {
-            Reservation current = reservations.get(i);
-            Reservation next = reservations.get(i + 1);
-            if (current.fin().plusDays(1).isEqual(next.fin())) {
-                nbDays += current.debut().until(next.fin()).getDays();
-                if (nbDays >= 30) {
+        int nbDays = reservations.get(0).debut().until(reservations.get(0).fin().plusDays(1)).getDays();
+        for (int i = 1; i < reservations.size(); i++) {
+            if (reservations.get(i).debut().isEqual(reservations.get(i - 1).fin().plusDays(1))) {
+                nbDays += reservations.get(i).debut().until(reservations.get(i).fin().plusDays(1)).getDays();
+                if (nbDays > 30) {
                     throw new ServiceException("A vehicle cannot be booked for 30 consecutive days without a break.");
                 }
             } else {
@@ -68,9 +72,9 @@ public class ReservationService {
 
     public long create(Reservation reservation) throws ServiceException {
         try {
-            checkDoubleBooking(reservation);
+            checkDoubleBooking(reservation, false);
             checkMaxBooking(reservation);
-            check30Days(reservation);
+            check30Days(reservation, false);
             return reservationDao.create(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
@@ -151,9 +155,9 @@ public class ReservationService {
 
     public void update(Reservation reservation) throws ServiceException {
         try {
-            checkDoubleBooking(reservation);
+            checkDoubleBooking(reservation, true);
             checkMaxBooking(reservation);
-            check30Days(reservation);
+            check30Days(reservation, true);
             reservationDao.update(reservation);
         } catch (DaoException e) {
             throw new ServiceException();
